@@ -1,0 +1,54 @@
+services:
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 8000:80
+    depends_on:
+      - backend
+  #      - frontend
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data:cached
+
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    command: python app/main.py
+    tty: true
+    volumes:
+      - ./backend:/app/:cached
+      - ./.docker/.ipython:/root/.ipython:cached
+    environment:
+      PYTHONPATH: .
+      DATABASE_URL: "postgresql://admin:admin@localhost:5432/postgres"
+      SECURITY_KEY: "709cb22f047a59f492c4d6407e627240e2272bda11ab791c16fb4f4661f7285a95ba6efbc1bbf762cddcc3710a1487f4a3242f21b2d9cd751b3154a452c5a286"
+      ALGORITHM: "HS256"
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    depends_on:
+      - "postgres"
+
+#  frontend:
+#    build:
+#      context: frontend
+#      dockerfile: Dockerfile
+#    stdin_open: true
+#    volumes:
+#      - './frontend:/app:cached'
+#      - './frontend/node_modules:/app/node_modules:cached'
+#    environment:
+#      - NODE_ENV=development
+
+
+volumes:
+  db-data:

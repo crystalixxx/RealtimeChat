@@ -3,8 +3,7 @@ from pydantic import BaseModel, ConfigDict
 
 class UserBase(BaseModel):
     username: str
-    email: str
-    is_superuser: bool = False
+    is_superadmin: bool = False
     is_blocked: bool = False
 
 

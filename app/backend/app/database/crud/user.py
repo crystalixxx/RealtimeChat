@@ -1,16 +1,16 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.backend.app.misc.security import get_hashed_password
-from app.backend.app.database.schemas.user import UserCreate
-from app.backend.app.database.models import User
+from app.misc.security import get_hashed_password
+from app.database.schemas.user import UserCreate
+from app.database.models import User
 
 
-def get_user_by_email(db: Session, user_email: str) -> User:
-    user = db.query(User).filter(User.email == user_email).first()
+def get_user_by_username(db: Session, user_name: str) -> User:
+    user = db.query(User).filter(User.username == user_name).first()
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        return None
 
     return user
 
@@ -20,7 +20,6 @@ def create_user(db: Session, user: UserCreate) -> User:
 
     user = User(
         username=user.username,
-        email=user.email,
         is_blocked=user.is_blocked,
         hashed_password=hashed_password,
     )

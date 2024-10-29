@@ -1,6 +1,7 @@
-from sqlalchemy import create_engine, Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
-from app.backend.app.misc.config import config
+from app.misc.config import config
 
 engine = create_engine(config.PG_CONNECTION_URL)
 

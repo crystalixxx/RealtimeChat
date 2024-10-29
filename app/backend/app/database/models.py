@@ -11,7 +11,7 @@ from sqlalchemy import (
     Text,
     Boolean,
 )
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, Mapped, relationship
 
 Base = declarative_base()
 
@@ -21,9 +21,13 @@ class User(Base):
 
     id: int = Column(Integer, primary_key=True, autoincrement=True)
     username: str = Column(String, nullable=False, unique=True)
-    email: EmailStr = Column(String, nullable=False)
     hashed_password: str = Column(String, nullable=False)
     is_blocked: bool = Column(Boolean, nullable=False, default=False)
+    is_superadmin: bool = Column(Boolean, nullable=False, default=False)
+
+    chats: Mapped[list["Chat"]] = relationship(
+        "Chat", secondary="chat_member", back_populates="users", lazy="joined"
+    )
 
 
 class Chat(Base):
@@ -33,12 +37,17 @@ class Chat(Base):
     name: str = Column(String, nullable=False)
     created_at: datetime = Column(DateTime(timezone=True), server_default=func.now())
 
+    users: Mapped[list["User"]] = relationship(
+        "User", secondary="chat_member", back_populates="chats", lazy="joined"
+    )
+
 
 class Message(Base):
     __tablename__ = "message"
 
     id: int = Column(Integer, primary_key=True, autoincrement=True)
     sender_id: int = Column(Integer, ForeignKey("user.id"), nullable=False)
+    receiver_id: int = Column(Integer, ForeignKey("user.id"), nullable=False)
     chat_id: int = Column(Integer, ForeignKey("chat.id"), nullable=False)
     content: str = Column(Text, nullable=False)
     sent_at: datetime = Column(DateTime(timezone=True), server_default=func.now())

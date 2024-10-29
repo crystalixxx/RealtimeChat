@@ -1,7 +1,7 @@
 import jwt
-from dns.dnssecalgs import algorithms
 
 from fastapi import Depends, HTTPException
+from sqlalchemy.orm import Session
 from starlette import status
 
 from app.backend.database.crud.user import create_user, get_user_by_email
@@ -46,7 +46,7 @@ async def get_current_superuser(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-def sign_up_new_user(email: str, password: str, db=Depends(get_db_connection)):
+def sign_up_new_user(email: str, password: str, db: Session):
     user = get_user_by_email(db, email)
     if user:
         return False

@@ -22,6 +22,7 @@ class User(Base):
     id: int = Column(Integer, primary_key=True, autoincrement=True)
     username: str = Column(String, nullable=False, unique=True)
     email: EmailStr = Column(String, nullable=False)
+    hashed_password: str = Column(String, nullable=False)
     is_blocked: bool = Column(Boolean, nullable=False, default=False)
 
 

@@ -1,13 +1,16 @@
+version: "3.8"
+
 services:
   nginx:
     image: nginx
+    ports:
+      - "8000:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-    ports:
-      - 8000:80
     depends_on:
       - backend
-  #      - frontend
+      - frontend
+    command: /bin/sh -c "sleep 5 && nginx -g 'daemon off;'"
 
   postgres:
     image: postgres
@@ -16,7 +19,7 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data:cached
 
@@ -38,17 +41,17 @@ services:
     depends_on:
       - "postgres"
 
-#  frontend:
-#    build:
-#      context: frontend
-#      dockerfile: Dockerfile
-#    stdin_open: true
-#    volumes:
-#      - './frontend:/app:cached'
-#      - './frontend/node_modules:/app/node_modules:cached'
-#    environment:
-#      - NODE_ENV=development
-
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile  # Используем Dockerfile.dev для разработки
+    ports:
+      - "5173:5173"  # Порт для Vite
+      - "35729:35729"  # Порт для hot-reloading
+    volumes:
+      - ./frontend:/app  # Монтируем исходные файлы для hot-reloading
+    environment:
+      - NODE_ENV=development  # Устанавливаем режим разработки
 
 volumes:
   db-data:

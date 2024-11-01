@@ -13,6 +13,12 @@ class UserCreate(UserBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UserUpdate(UserBase):
+    password: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class User(UserBase):
     id: int
 

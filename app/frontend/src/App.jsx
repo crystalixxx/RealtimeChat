@@ -1,9 +1,16 @@
+import {Routes, Route} from "react-router-dom";
+import Login from "./Login";
+import Profile from "./Profile";
+import ChatPage from "./ChatPage";
+
 export default function App() {
-  return (
-    <>
-        <h1>Privet</h1>
-        <h2>Mir</h2>
-        <h3>Hello World!</h3>
-    </>
-  )
+    return (
+        <div className="App">
+            <Routes>
+                <Route path="/" element={<Login/>}/>
+                <Route path="/profile" element={<Profile/>}/>
+                <Route path="/chat/:chatId" element={<ChatPage/>}/>
+            </Routes>
+        </div>
+    )
 }

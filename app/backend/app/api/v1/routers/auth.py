@@ -5,7 +5,12 @@ from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
 from app.database.session import get_db_connection
-from app.misc.auth import sign_up_new_user, authenticate_user, get_current_superuser
+from app.misc.auth import (
+    sign_up_new_user,
+    authenticate_user,
+    get_current_superuser,
+    get_current_user,
+)
 from app.misc.config import config
 from app.misc.security import create_access_token
 
@@ -76,3 +81,9 @@ async def signup_superadmin(
             detail="Account already exists",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+@auth_router.get("/check-auth")
+async def check_auth(user=Depends(get_current_user)):
+    print(user.username, 1111111111111)
+    return {"status": "ok", "username": user.username, "id": user.id}

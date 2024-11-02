@@ -1,13 +1,13 @@
 .message {
     display: block;
     background-color: #eeeeee;
-    border: 2px solid black;
+    border-radius: 12px;
     padding: 8px;
-    max-width: 50%; /* Ограничивает ширину */
+    max-width: 80%;
     word-wrap: break-word;
     margin-bottom: 8px;
     box-sizing: border-box;
-    clear: both; /* Разделяет сообщения */
+    clear: both;
     float: left;
 }
 
@@ -28,6 +28,6 @@
 
 .message.active {
     display: block;
-    background-color: orange;
+    background-color: #f7d794;
     float: right;
 }

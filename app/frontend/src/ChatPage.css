@@ -2,19 +2,127 @@ h1, p, span, a {
     color: #000;
 }
 
+.header {
+    display: flex;
+    margin-bottom: 10px;
+    column-gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+h1 {
+    font-family: "Trebuchet MS";
+    font-size: 32px;
+    margin: 0;
+    font-weight: bold;
+    text-align: center;
+}
+
+.main-modal-users-add button {
+    font-family: "Trebuchet MS", sans-serif;
+    font-weight: bolder;
+    font-size: 40px;
+    color: black;
+}
+
+.modal-close-button {
+    padding: 0;
+    border: none;
+    background-color: transparent;
+}
+
+.users-to-add-list {
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translate(-50%, -50%);
+    max-width: 50%;
+}
+
+.users-add-content-div {
+    display: flex;
+    column-gap: 10px;
+    background: transparent;
+    align-items: center;
+}
+
+.users-add-content-div p {
+    color: #000;
+    font-family: "Trebuchet MS", sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    margin: 0;
+}
+
+.users-add-content-div button {
+    padding: 0;
+    color: #000;
+    margin: 0;
+    background-color: transparent;
+}
+
 .message-container {
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 20px;
+    padding: 15px 40px;
 }
 
 .messages-storage {
-    background-color: #4c4c4c;
+    background-color: transparent;
     border: 2px solid white;
-    max-height: 400px;
+    max-height: 500px;
+    min-width: 400px;
     margin: 0 auto;
     overflow-y: auto;
     box-sizing: border-box;
     position: relative;
+}
+
+.input-wrapper {
+    display: flex;
+    width: 100%;
+    max-width: 500px;
+    background-color: #f1f1f1;
+    border-radius: 25px;
+    padding: 5px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.message-input {
+    padding: 10px 15px;
+    font-size: 16px;
+    border: none;
+    outline: none;
+    border-radius: 25px 0 0 25px;
+    background-color: transparent;
+    color: black;
+}
+
+.input-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.message-send-button {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 8px 12px;
+    background-color: #007bff; /* Цвет фона кнопки */
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.message-send-button:hover {
+    background-color: #0056b3; /* Цвет кнопки при наведении */
 }

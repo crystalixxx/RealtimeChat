@@ -55,10 +55,6 @@ export default function Profile() {
         return <p>Загрузка...</p>;
     }
 
-    if (authStatus === false) {
-        return <p>Ресурс недоступен, обновите токен</p>;
-    }
-
     return (
         <div style={{marginTop: 20, minHeight: 700}}>
             <h1>Profile page</h1>

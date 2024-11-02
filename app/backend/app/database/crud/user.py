@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import select
 
 from app.misc.security import get_hashed_password
 from app.database.schemas.user import UserCreate, UserUpdate
-from app.database.models import User
+from app.database.models import User, ChatMember
 
 
 def get_all_users(db: Session) -> list[User]:

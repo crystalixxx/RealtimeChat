@@ -26,7 +26,7 @@ class User(Base):
     is_superadmin: bool = Column(Boolean, nullable=False, default=False)
 
     chats: Mapped[list["Chat"]] = relationship(
-        "Chat", secondary="chat_member", back_populates="users", lazy="joined"
+        "Chat", secondary="chat_member", back_populates="users"
     )
     messages: Mapped[list["Message"]] = relationship("Message", back_populates="sender")
 
@@ -39,7 +39,7 @@ class Chat(Base):
     created_at: datetime = Column(DateTime(timezone=True), server_default=func.now())
 
     users: Mapped[list["User"]] = relationship(
-        "User", secondary="chat_member", back_populates="chats", lazy="joined"
+        "User", secondary="chat_member", back_populates="chats"
     )
 
 

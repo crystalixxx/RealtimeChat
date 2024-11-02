@@ -41,18 +41,13 @@ async def chat_endpoint(
     user_id: int,
     db=Depends(get_db_connection),
 ):
-    print("here")
-
-    await websocket.accept()
-    await chat_manager.connect(chat_id, user_id)
-
+    await chat_manager.connect(chat_id, websocket)
     try:
         while True:
             data = await websocket.receive_text()
-            await chat_manager.send_message(chat_id, data, user_id, db)
-
+            await chat_manager.broadcast(user_id, chat_id, data, db)
     except WebSocketDisconnect:
-        chat_manager.disconnect(chat_id, user_id)
+        chat_manager.disconnect(chat_id, websocket)
 
 
 @chats_router.get("/{chat_id}")

@@ -1,0 +1,33 @@
+.message {
+    display: block;
+    background-color: #eeeeee;
+    border: 2px solid black;
+    padding: 8px;
+    max-width: 50%; /* Ограничивает ширину */
+    word-wrap: break-word;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+    clear: both; /* Разделяет сообщения */
+    float: left;
+}
+
+.message h3 {
+    font-family: "Trebuchet MS";
+    font-weight: bolder;
+    color: black;
+    margin: 0;
+    font-size: 18px;
+}
+
+.message p {
+    margin: 0;
+    font-family: "Trebuchet MS";
+    font-weight: 400;
+    font-size: 16px;
+}
+
+.message.active {
+    display: block;
+    background-color: orange;
+    float: right;
+}

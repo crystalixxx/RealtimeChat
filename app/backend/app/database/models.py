@@ -28,6 +28,7 @@ class User(Base):
     chats: Mapped[list["Chat"]] = relationship(
         "Chat", secondary="chat_member", back_populates="users", lazy="joined"
     )
+    messages: Mapped[list["Message"]] = relationship("Message", back_populates="sender")
 
 
 class Chat(Base):
@@ -50,6 +51,8 @@ class Message(Base):
     chat_id: int = Column(Integer, ForeignKey("chat.id"), nullable=False)
     content: str = Column(Text, nullable=False)
     sent_at: datetime = Column(DateTime(timezone=True), server_default=func.now())
+
+    sender = relationship("User", back_populates="messages", lazy="joined")
 
 
 class ChatMember(Base):

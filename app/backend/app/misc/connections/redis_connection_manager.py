@@ -12,31 +12,28 @@ redis_client = redis.Redis(
     decode_responses=True,
 )
 
+import json
+from typing import Dict, List
+from fastapi import WebSocket
+from sqlalchemy.orm import Session
+
 
 class ConnectionManager:
-    def __init__(self, new_redis_client, prefix_id):
-        self.redis_client = new_redis_client
-        self.prefix_id = prefix_id
+    def __init__(self):
+        self.active_connections: dict[int, List[WebSocket]] = {}
 
-    async def connect(self, chat_id: str, user_id: str):
-        self.redis_client.sadd(f"{self.prefix_id}:{chat_id}", user_id)
+    async def connect(self, chat_id: int, websocket: WebSocket):
+        await websocket.accept()
 
-    def disconnect(self, chat_id: str, user_id: str):
-        self.redis_client.srem(f"{self.prefix_id}:{chat_id}", user_id)
+        if chat_id not in self.active_connections:
+            self.active_connections[chat_id] = []
 
-    async def send_message(
-        self, chat_id: int, message: str, sender_id: int, db: Session
-    ):
-        self.redis_client.publish(chat_id, message)
-        self.save_message_to_db(chat_id, sender_id, message, db)
+        if websocket not in self.active_connections[chat_id]:
+            self.active_connections[chat_id].append(websocket)
 
-    async def listen_to_messages(self, chat_id: str, websocket: WebSocket):
-        pubsub = self.redis_client.pubsub()
-        pubsub.subscribe(chat_id)
-
-        for message in pubsub.listen():
-            if message["type"] == "message":
-                await websocket.send_text(message["data"])
+    def disconnect(self, chat_id: int, websocket: WebSocket):
+        if chat_id in self.active_connections:
+            self.active_connections[chat_id].remove(websocket)
 
     @staticmethod
     def save_message_to_db(chat_id: int, sender_id: int, content: str, db: Session):
@@ -48,5 +45,11 @@ class ConnectionManager:
         db.add(new_message)
         db.commit()
 
+    async def broadcast(self, user_id: int, chat_id: int, message: str, db: Session):
+        self.save_message_to_db(chat_id, user_id, message, db)
 
-chat_manager = ConnectionManager(redis_client, "CHAT_CONNECTION")
+        for connection in self.active_connections[chat_id]:
+            await connection.send_text(message)
+
+
+chat_manager = ConnectionManager()

@@ -1,15 +1,16 @@
 import {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import axios from "axios";
+import './ChatPage.css'
+import Message from "./Message.jsx";
 
 export default function ChatPage() {
-    const {chatId} = useParams(); // Извлекаем chatId из URL
-    const [message, setMessage] = useState(""); // Сообщение для отправки
-    const [authStatus, setAuthStatus] = useState(null); // null - загрузка, true - авторизован, false - не авторизован
+    const {chatId} = useParams();
+    const [message, setMessage] = useState("");
+    const [authStatus, setAuthStatus] = useState(null);
     const [userId, setUserId] = useState(null);
-    const [receivedMessages, setReceivedMessages] = useState([]); // Хранение полученных сообщений
-    const [ws, setWs] = useState(null); // Состояние для WebSocket подключения
-    const [rendered, setRendered] = useState(false)
+    const [receivedMessages, setReceivedMessages] = useState([]);
+    const [ws, setWs] = useState(null);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -19,7 +20,7 @@ export default function ChatPage() {
                 });
                 if (response.status === 200) {
                     setAuthStatus(true);
-                    setUserId(response.data.id)
+                    setUserId(response.data.id);
                 }
             } catch (error) {
                 setAuthStatus(false);
@@ -28,82 +29,75 @@ export default function ChatPage() {
         checkAuth();
     }, []);
 
-    // Подключение к WebSocket при монтировании компонента
     useEffect(() => {
         if (authStatus) {
-            console.log(`connected to ${chatId} ${userId}`)
-            const socket = new WebSocket(`ws://localhost:8000/api/chats/ws/${chatId}/${userId}`); // Подключение к WebSocket серверу
+            const socket = new WebSocket(`ws://localhost:8000/api/chats/ws/${chatId}/${userId}`);
 
             socket.onopen = () => {
                 console.log("WebSocket подключен");
             };
 
-            // socket.onmessage = (event) => {
-            //     console.log(event.data);
-            //     setReceivedMessages((prevMessages) => [...prevMessages, event.data]); // Добавление нового сообщения в массив
-            // };
+            socket.onmessage = (event) => {
+                console.log(`New message: ${event.data}`);
+                handleMessages();
+            }
 
             socket.onclose = () => {
                 console.log("WebSocket отключен");
             };
 
-            setWs(socket); // Сохраняем подключение
+            setWs(socket);
 
-            // Закрываем соединение при размонтировании компонента
             return () => {
                 socket.close();
             };
         }
-    }, [chatId, authStatus]); // обновляем WebSocket подключение при изменении chatId
+    }, [chatId, authStatus]);
+
+    async function handleMessages() {
+        try {
+            const response = await axios.get(`http://localhost:8000/api/chats/${chatId}`, {
+                headers: {Authorization: `Bearer ${localStorage.getItem("jwt_token")}`},
+            });
+            if (response.status === 200) {
+                setReceivedMessages(response.data.sort((a, b) => {
+                    return -(new Date(b.sent_at) - new Date(a.sent_at));
+                }));
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     useEffect(() => {
         if (authStatus) {
-            // setReceivedMessages
-            const getMessages = async () => {
-                try {
-                    setRendered(false);
-                    const response = await axios.get(`http://localhost:8000/api/chats/${chatId}`, {
-                        headers: {Authorization: `Bearer ${localStorage.getItem("jwt_token")}`},
-                    });
-                    if (response.status === 200) {
-                        console.log(response.data);
-                        setReceivedMessages(response.data);
-                        setRendered(true);
-                    }
-                } catch (error) {
-                    console.log(error);
-                }
-            };
-
-            getMessages();
+            handleMessages();
         }
-    }, [chatId, authStatus])
+    }, [chatId, authStatus]);
 
-    // Отправка сообщения по WebSocket
+    useEffect(() => {
+        const messagesContainer = document.querySelector('.messages-storage');
+        if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    }, [receivedMessages]);
+
     const sendMessage = () => {
-        if (ws && ws.readyState === WebSocket.OPEN && message.trim()) {
+        if (ws && message.trim()) {
             ws.send(message);
             setMessage("");
         }
     };
 
-    console.log("Rendering with messages:", receivedMessages);
-
-    if (!rendered) {
-        return <p>Загрузка...</p>
-    }
-
     return (
-        <div>
+        <div className="message-container">
             <h1>Chat with ID: {chatId}</h1>
 
-            <div>
-                <h2>Сообщения</h2>
-                <div style={{border: "1px solid #ccc", padding: "10px", minHeight: "200px"}}>
-                    {receivedMessages.map(message => (
-                        <p key={message.id}>{message.content}</p>
-                    ))}
-                </div>
+            <div className="messages-storage">
+                {receivedMessages.map((msg, index) => (
+                    <Message key={index} message={msg.content} author={msg.sender.username}
+                             is_own={msg.sender_id == userId} sent_at={msg.sent_at}/>
+                ))}
             </div>
 
             <div>

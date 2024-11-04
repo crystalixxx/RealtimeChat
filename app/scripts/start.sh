@@ -8,7 +8,7 @@ docker compose build
 sleep 1;
 
 # Build and run containers
-docker compose up
+docker compose up -d
 
 # Hack to wait for postgres container to be up before running alembic migrations
 

@@ -6,6 +6,7 @@ from sqlalchemy.sql import select
 
 from app.database.crud.user import get_user_by_id
 from app.database.models import Chat as ModelsChat, ChatMember, User
+from app.database.schemas.chat import ChatUpdate
 from app.database.session import get_db_connection
 from app.misc.auth import get_current_user
 
@@ -88,3 +89,39 @@ def get_members_of_chat(db: Session, chat_id: int) -> list[User]:
     )
 
     return users
+
+
+def remove_member_from_chat(db: Session, chat_id: int, user_id: int) -> ChatMember:
+    query = (
+        db.query(ChatMember)
+        .filter(ChatMember.chat_id == chat_id, ChatMember.member_id == user_id)
+        .one()
+    )
+
+    db.delete(query)
+    db.commit()
+
+    return query
+
+
+def delete_chat(db: Session, chat_id: int) -> ModelsChat:
+    chat = db.query(ModelsChat).filter(ModelsChat.id == chat_id).first()
+
+    db.delete(chat)
+    db.commit()
+
+    return chat
+
+
+def edit_chat(db: Session, chat_id: int, new_chat: ChatUpdate):
+    chat = get_chat_by_id(db, chat_id)
+    chat_dict = new_chat.dict(exclude_none=True)
+
+    for key, value in chat_dict.items():
+        setattr(chat, key, value)
+
+    db.add(chat)
+    db.commit()
+    db.refresh(chat)
+
+    return chat

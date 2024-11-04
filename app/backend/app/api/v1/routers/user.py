@@ -8,6 +8,7 @@ from app.database.crud.user import (
     create_user,
     delete_user,
     update_user,
+    get_common_users,
 )
 from app.database.schemas.user import UserCreate, UserUpdate
 from app.database.session import get_db_connection
@@ -24,7 +25,7 @@ async def read_users(
     return get_all_users(db)
 
 
-@user_router.get("/{user_id}")
+@user_router.get("/user/{user_id}")
 async def user_by_id(
     user_id: int, db=Depends(get_db_connection), current_user=Depends(get_current_user)
 ):
@@ -36,6 +37,13 @@ async def user_by_id(
         )
 
     return current_user
+
+
+@user_router.get("/common")
+async def common_users_list(
+    db=Depends(get_db_connection), current_user=Depends(get_current_user)
+):
+    return get_common_users(db, current_user.id)
 
 
 @user_router.post("/{user_id}")

@@ -28,6 +28,10 @@ def get_user_by_id(db: Session, user_id: int) -> User:
     return user
 
 
+def get_common_users(db: Session, user_id: int) -> list[User]:
+    return db.query(User).filter(User.is_superadmin == False, User.id != user_id).all()
+
+
 def create_user(db: Session, user: UserCreate) -> User:
     existing_user = get_user_by_username(db, user.username)
     if existing_user:

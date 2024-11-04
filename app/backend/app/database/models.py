@@ -59,8 +59,14 @@ class ChatMember(Base):
     __tablename__ = "chat_member"
 
     chat_id: int = Column(
-        Integer, ForeignKey("chat.id"), nullable=False, primary_key=True
+        Integer,
+        ForeignKey("chat.id", ondelete="CASCADE"),
+        nullable=False,
+        primary_key=True,
     )
     member_id: int = Column(
-        Integer, ForeignKey("user.id"), nullable=False, primary_key=True
+        Integer,
+        ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
+        primary_key=True,
     )

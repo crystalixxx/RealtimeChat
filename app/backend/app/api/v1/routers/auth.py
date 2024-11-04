@@ -85,5 +85,9 @@ async def signup_superadmin(
 
 @auth_router.get("/check-auth")
 async def check_auth(user=Depends(get_current_user)):
-    print(user.username, 1111111111111)
-    return {"status": "ok", "username": user.username, "id": user.id}
+    return {
+        "status": "ok",
+        "username": user.username,
+        "id": user.id,
+        "is_superadmin": user.is_superadmin,
+    }

@@ -1,16 +1,18 @@
 import {useEffect, useState} from "react";
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import axios from "axios";
 import './ChatPage.css'
 import Message from "./Message.jsx";
 import Modal from 'react-modal';
 
 export default function ChatPage() {
+    const navigate = useNavigate();
     const {chatId} = useParams();
     const [message, setMessage] = useState("");
     const [authStatus, setAuthStatus] = useState(null);
     const [chatData, setChatData] = useState({});
     const [userId, setUserId] = useState(null);
+    const [isSuperadmin, setIsSuperadmin] = useState(false);
     const [receivedMessages, setReceivedMessages] = useState([]);
     const [ws, setWs] = useState(null);
     const [usersToAdd, setUsersToAdd] = useState([]);
@@ -18,12 +20,42 @@ export default function ChatPage() {
     const [modalIsOpen, setModalIsOpen] = useState(false);
 
     const openModal = () => {
+        getUserToAddData();
+        getCurrentUserData();
         setModalIsOpen(true);
     };
 
     const closeModal = () => {
         setModalIsOpen(false);
     };
+
+    async function getCurrentUserData() {
+        try {
+            const response = await axios.get(`http://localhost:8000/api/chats/members/${chatId}`, {
+                headers: {Authorization: `Bearer ${localStorage.getItem("jwt_token")}`},
+            })
+
+            if (response.status === 200) {
+                setCurrentUsers(response.data)
+            }
+        } catch (error) {
+            setAuthStatus(false);
+        }
+    }
+
+    async function getUserToAddData() {
+        try {
+            const response = await axios.get(`http://localhost:8000/api/chats/available_users/${chatId}`, {
+                headers: {Authorization: `Bearer ${localStorage.getItem("jwt_token")}`},
+            });
+
+            if (response.status === 200) {
+                setUsersToAdd(response.data);
+            }
+        } catch (error) {
+            setAuthStatus(false);
+        }
+    }
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -34,6 +66,7 @@ export default function ChatPage() {
                 if (response.status === 200) {
                     setAuthStatus(true);
                     setUserId(response.data.id);
+                    setIsSuperadmin(response.data.is_superadmin);
                 }
             } catch (error) {
                 setAuthStatus(false);
@@ -64,34 +97,6 @@ export default function ChatPage() {
 
     useEffect(() => {
         if (authStatus) {
-            const getUserToAddData = async () => {
-                try {
-                    const response = await axios.get(`http://localhost:8000/api/chats/available_users/${chatId}`, {
-                        headers: {Authorization: `Bearer ${localStorage.getItem("jwt_token")}`},
-                    });
-
-                    if (response.status === 200) {
-                        setUsersToAdd(response.data);
-                    }
-                } catch (error) {
-                    setAuthStatus(false);
-                }
-            }
-
-            const getCurrentUserData = async () => {
-                try {
-                    const response = await axios.get(`http://localhost:8000/api/chats/members/${chatId}`, {
-                        headers: {Authorization: `Bearer ${localStorage.getItem("jwt_token")}`},
-                    })
-
-                    if (response.status === 200) {
-                        setCurrentUsers(response.data)
-                    }
-                } catch (error) {
-                    setAuthStatus(false);
-                }
-            }
-
             getUserToAddData();
             getCurrentUserData();
         }
@@ -106,7 +111,6 @@ export default function ChatPage() {
             };
 
             socket.onmessage = (event) => {
-                console.log(`New message: ${event.data}`);
                 handleMessages();
             }
 
@@ -137,11 +141,54 @@ export default function ChatPage() {
         }
     }
 
-    async function addMemberToChat(userId) {
+    async function deleteChat() {
         try {
-            const response = await axios.post(`https://localhost:8000/api/chats/${chatId}/${userId}`, {
+            const response = await axios.delete(`http://localhost:8000/api/chats/${chatId}`, {
                 headers: {Authorization: `Bearer ${localStorage.getItem("jwt_token")}`},
             })
+
+            if (response.status === 200) {
+                navigate(`/profile`);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function removeFromChat(deletingUserId) {
+        if (userId !== deletingUserId && !isSuperadmin) {
+            return false;
+        }
+
+        try {
+            const response = await axios.put(`http://localhost:8000/api/chats/${chatId}/${deletingUserId}`, {},
+                {
+                    headers: {Authorization: `Bearer ${localStorage.getItem("jwt_token")}`},
+                })
+
+            if (response.status === 200) {
+                if (userId === deletingUserId) {
+                    navigate("/profile");
+                } else {
+                    navigate(0);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function addMemberToChat(userId) {
+        try {
+            const response = await axios.post(`http://localhost:8000/api/chats/${chatId}/${userId}`, {},
+                {
+                    headers: {Authorization: `Bearer ${localStorage.getItem("jwt_token")}`},
+                })
+
+            console.log(response.status, response.data);
+            if (response.status === 200) {
+                navigate(0);
+            }
         } catch (error) {
             console.log(error);
         }
@@ -162,7 +209,7 @@ export default function ChatPage() {
 
     const sendMessage = () => {
         if (ws && message.trim()) {
-            ws.send(message);
+            ws.send(JSON.stringify({action: 'send', message: {text: message}}));
             setMessage("");
         }
     };
@@ -173,22 +220,22 @@ export default function ChatPage() {
         <div className="main-modal-users-add">
             <button onClick={closeModal} className="modal-close-button">X</button>
 
-            <div className="second-div">
-                {currentUsers.map((user, index) => {
-                    return <div key={index} className="users-add-content-div">
-                        <p>{user.username}</p>
-                        <button>X</button>
-                    </div>
-                })}
-            </div>
-
-            <p>AHASHAHSHAS</p>
-
+            <h1>New Users to Add</h1>
             <div className="users-to-add-list">
                 {usersToAdd.map((user, index) => {
                     return <div key={index} className="users-add-content-div">
                         <p>{user.username}</p>
-                        <button>+</button>
+                        <button onClick={() => addMemberToChat(user.id)}>+</button>
+                    </div>
+                })}
+            </div>
+
+            <h1>Users List</h1>
+            <div className="second-div">
+                {currentUsers.map((user, index) => {
+                    return <div key={index} className="users-add-content-div">
+                        <p>{user.username}</p>
+                        <button onClick={() => removeFromChat(user.id)} className={isSuperadmin ? "" : "hidden"}>X</button>
                     </div>
                 })}
             </div>
@@ -198,9 +245,10 @@ export default function ChatPage() {
     return (
         <div className="message-container">
             <div className="header">
-                <h1>{chatData.name}</h1>
-                <button className="add-user-button" onClick={openModal}>
-                    +
+                <button onClick={() => removeFromChat(userId)} className={isSuperadmin ? "hidden" : ""}>Выйти</button>
+                <button onClick={openModal} className="header-h1-button">{chatData.name}</button>
+                <button onClick={deleteChat} className={isSuperadmin ? 'remove-button' : 'remove-button hidden'}>
+                    Удалить
                 </button>
             </div>
 
@@ -210,8 +258,9 @@ export default function ChatPage() {
 
             <div className="messages-storage">
                 {receivedMessages.map((msg, index) => (
-                    <Message key={index} message={msg.content} author={msg.sender.username}
-                             is_own={msg.sender_id == userId} sent_at={msg.sent_at}/>
+                    <Message key={index} message={msg.content} author={msg.sender}
+                             is_own={msg.sender_id === userId} sent_at={msg.sent_at} is_superadmin={isSuperadmin}
+                             id={msg.id} ws={ws}/>
                 ))}
             </div>
 

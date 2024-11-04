@@ -31,3 +31,24 @@
     background-color: #f7d794;
     float: right;
 }
+
+.message-header {
+    display: flex;
+    column-gap: 10px;
+}
+
+.message-header button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    color: black;
+    transition: 0.2s;
+}
+
+.message-header button:hover {
+    color: rgb(120, 120, 120);
+}
+

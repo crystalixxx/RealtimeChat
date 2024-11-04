@@ -1,23 +1,25 @@
 from pydantic import BaseModel, ConfigDict
 
 
-class ChatBase(BaseModel):
-    name: str
+class MessageBase(BaseModel):
+    sender_id: int
+    chat_id: int
+    content: str
 
 
-class ChatCreate(ChatBase):
+class MessageCreate(MessageBase):
     model_config = ConfigDict(from_attributes=True)
 
 
-class ChatDelete(ChatBase):
+class MessageDelete(MessageBase):
     pass
 
 
-class ChatUpdate(ChatBase):
+class MessageUpdate(MessageBase):
     model_config = ConfigDict(from_attributes=True)
 
 
-class Chat(ChatBase):
+class Message(MessageBase):
     id: int
 
     model_config = ConfigDict(from_attributes=True)

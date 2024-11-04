@@ -1,0 +1,76 @@
+ul {
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    list-style: none;
+}
+
+.profile-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.profile {
+    background-color: rgb(230, 230, 230);
+    min-width: 25%;
+    min-height: 100%;
+}
+
+.profile-action-header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    background-color: rgb(60, 60, 60);
+    margin-bottom: 10px;
+    padding: 10px 0;
+}
+
+.profile-action-header ul {
+    display: flex;
+    column-gap: 20px;
+}
+
+.profile-info-container {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.profile-chats {
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+    width: 90%;
+    margin: 0 auto;
+}
+
+.profile-chats button {
+    display: block;
+    background-color: transparent;
+    border: 2px solid black;
+    width: 100%;
+    outline: none;
+    transition: 0.2s;
+    font-family: "Trebuchet MS", sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: black;
+}
+
+.profile-chats button:hover {
+    color: rgba(130, 130, 130);
+    border: 2px solid rgba(130, 130, 130);
+}
+
+.create-new-chat-modal {
+    color: black;
+    font-family: "Trebuchet MS", sans-serif;
+}
+
+.modal-close-button {
+    color: black;
+}

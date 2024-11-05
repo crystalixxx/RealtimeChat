@@ -47,7 +47,9 @@ class Message(Base):
 
     id: int = Column(Integer, primary_key=True, autoincrement=True)
     sender_id: int = Column(Integer, ForeignKey("user.id"), nullable=False)
-    chat_id: int = Column(Integer, ForeignKey("chat.id"), nullable=False)
+    chat_id: int = Column(
+        Integer, ForeignKey("chat.id", ondelete="CASCADE"), nullable=False
+    )
     content: str = Column(Text, nullable=False)
     sent_at: datetime = Column(DateTime(timezone=True), server_default=func.now())
 

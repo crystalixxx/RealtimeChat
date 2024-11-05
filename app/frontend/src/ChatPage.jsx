@@ -79,7 +79,7 @@ export default function ChatPage() {
         if (authStatus) {
             const getChatData = async () => {
                 try {
-                    const response = await axios.get(`http://localhost:8000/api/chats/${chatId}`, {
+                    const response = await axios.get(`http://localhost:8000/api/chats/chat/${chatId}/${userId}`, {
                         headers: {Authorization: `Bearer ${localStorage.getItem("jwt_token")}`},
                     });
 
@@ -131,10 +131,13 @@ export default function ChatPage() {
             const response = await axios.get(`http://localhost:8000/api/chats/messages/${chatId}`, {
                 headers: {Authorization: `Bearer ${localStorage.getItem("jwt_token")}`},
             });
+
             if (response.status === 200) {
-                setReceivedMessages(response.data.sort((a, b) => {
+                response.data.sort((a, b) => {
                     return -(new Date(b.sent_at) - new Date(a.sent_at));
-                }));
+                })
+
+                setReceivedMessages(response.data);
             }
         } catch (error) {
             console.log(error);
@@ -235,7 +238,8 @@ export default function ChatPage() {
                 {currentUsers.map((user, index) => {
                     return <div key={index} className="users-add-content-div">
                         <p>{user.username}</p>
-                        <button onClick={() => removeFromChat(user.id)} className={isSuperadmin ? "" : "hidden"}>X</button>
+                        <button onClick={() => removeFromChat(user.id)} className={isSuperadmin ? "" : "hidden"}>X
+                        </button>
                     </div>
                 })}
             </div>

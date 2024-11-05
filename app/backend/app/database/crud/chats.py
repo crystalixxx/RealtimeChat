@@ -35,15 +35,18 @@ def get_chat_by_id(db: Session, chat_id: int) -> Chat:
 
 
 def user_is_member_of_chat(
-    chat_id: int, current_user=Depends(get_current_user), db=Depends(get_db_connection)
+    chat_id: int,
+    user_id: int,
+    current_user=Depends(get_current_user),
+    db=Depends(get_db_connection),
 ) -> ChatMember:
-    user = get_user_by_id(db, current_user.id)
+    user = get_user_by_id(db, user_id)
     if user.is_superadmin:
-        return {}
+        return ChatMember(chat_id=chat_id, member_id=user_id)
 
     member = (
         db.query(ChatMember)
-        .filter(ChatMember.chat_id == chat_id, ChatMember.member_id == current_user.id)
+        .filter(ChatMember.chat_id == chat_id, ChatMember.member_id == user_id)
         .one_or_none()
     )
 

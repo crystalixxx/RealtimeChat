@@ -1,17 +1,15 @@
 from sqlalchemy.orm import Session
 
 from app.database.models import Chat, Message
-from app.database.schemas.message import MessageCreate
+from app.database.schemas.message import MessageCreate, Message as SchemaMessage
 
 
 async def get_message_by_id(db: Session, message_id: int):
     return db.query(Message).filter(Message.id == message_id).one_or_none()
 
 
-def send_message(db: Session, message: MessageCreate):
-    message = Message(
-        sender_id=message.sender_id, chat_id=message.chat_id, content=message.content
-    )
+def send_message(db: Session, sender_id: int, chat_id: int, message: str):
+    message = Message(sender_id=sender_id, chat_id=chat_id, content=message)
 
     db.add(message)
     db.commit()
@@ -31,6 +29,7 @@ def get_messages_from_chat(
         .offset(offset)
         .all()
     )
+
     return messages
 
 

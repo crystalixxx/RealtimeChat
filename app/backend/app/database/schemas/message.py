@@ -2,8 +2,6 @@ from pydantic import BaseModel, ConfigDict
 
 
 class MessageBase(BaseModel):
-    sender_id: int
-    chat_id: int
     content: str
 
 
@@ -20,6 +18,8 @@ class MessageUpdate(MessageBase):
 
 
 class Message(MessageBase):
+    sender_id: int
+    chat_id: int
     id: int
 
     model_config = ConfigDict(from_attributes=True)

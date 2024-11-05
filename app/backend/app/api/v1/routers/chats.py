@@ -18,8 +18,10 @@ from app.database.crud.messages import get_messages_from_chat
 from app.database.session import get_db_connection
 from app.misc.auth import get_current_user, get_current_superuser
 from app.database.schemas.chat import ChatCreate, ChatUpdate, Chat
+from app.database.schemas.message import Message
 from app.misc.connections.connection_manager import chat_manager
 from starlette.status import HTTP_409_CONFLICT
+
 
 chats_router = APIRouter()
 
@@ -29,14 +31,15 @@ async def list_of_chats(
     db=Depends(get_db_connection), current_user=Depends(get_current_user)
 ):
     if current_user.is_superadmin:
-        return {"chats": get_all_chats(db)}
+        return get_all_chats(db)
 
-    return {"chats": current_user.chats}
+    return current_user.chats
 
 
-@chats_router.get("/{chat_id}", response_model=Chat)
+@chats_router.get("/chat/{chat_id}/{user_id}", response_model=Chat)
 def chat_by_id(
     chat_id: int,
+    user_id: int,
     db=Depends(get_db_connection),
     member=Depends(user_is_member_of_chat),
 ):
@@ -141,6 +144,7 @@ async def chat_endpoint(
     try:
         while True:
             data = await websocket.receive_json()
+            print(data)
 
             sender = get_user_by_id(db, user_id)
             if sender is not None and sender.is_blocked:

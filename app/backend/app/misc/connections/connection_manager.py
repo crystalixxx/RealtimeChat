@@ -23,11 +23,9 @@ class ConnectionManager:
             self.active_connections[chat_id].remove(websocket)
 
     async def broadcast(self, user_id: int, chat_id: int, message: str, db: Session):
-        struct_message = MessageCreate(
-            sender_id=user_id, chat_id=chat_id, content=message
-        )
+        struct_message = MessageCreate(content=message)
 
-        send_message(db, struct_message)
+        send_message(db, user_id, chat_id, struct_message)
 
         for connection in self.active_connections[chat_id]:
             await connection.send_text(message)

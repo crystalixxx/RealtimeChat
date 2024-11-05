@@ -53,7 +53,7 @@ export default function Profile() {
                         headers: {Authorization: `Bearer ${localStorage.getItem("jwt_token")}`},
                     });
                     if (response.status === 200) {
-                        setChats(response.data.chats);
+                        setChats(response.data);
                     }
                 } catch (error) {
                     console.log(error);

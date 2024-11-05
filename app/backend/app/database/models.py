@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from pydantic import EmailStr
 from sqlalchemy import (
     Integer,
     Column,

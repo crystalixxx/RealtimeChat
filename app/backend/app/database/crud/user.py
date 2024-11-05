@@ -71,7 +71,7 @@ def update_user(db: Session, user_id: int, user: UserUpdate) -> User:
     if not old_user:
         return None
 
-    dict_values = user.dict(exclude_unset=True)
+    dict_values = user.model_dump(exclude_unset=True)
 
     if "password" in dict_values:
         dict_values["hashed_password"] = get_hashed_password(user.password)

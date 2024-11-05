@@ -17,14 +17,14 @@ from app.database.crud.user import get_user_by_id
 from app.database.crud.messages import get_messages_from_chat
 from app.database.session import get_db_connection
 from app.misc.auth import get_current_user, get_current_superuser
-from app.database.schemas.chat import ChatCreate, ChatUpdate
+from app.database.schemas.chat import ChatCreate, ChatUpdate, Chat
 from app.misc.connections.connection_manager import chat_manager
 from starlette.status import HTTP_409_CONFLICT
 
 chats_router = APIRouter()
 
 
-@chats_router.get("/")
+@chats_router.get("/", response_model=list[Chat])
 async def list_of_chats(
     db=Depends(get_db_connection), current_user=Depends(get_current_user)
 ):
@@ -34,7 +34,7 @@ async def list_of_chats(
     return {"chats": current_user.chats}
 
 
-@chats_router.get("/{chat_id}")
+@chats_router.get("/{chat_id}", response_model=Chat)
 def chat_by_id(
     chat_id: int,
     db=Depends(get_db_connection),
@@ -52,7 +52,7 @@ async def get_chat_messages(
     return get_messages_from_chat(db, chat_id)
 
 
-@chats_router.post("/{user_id}")
+@chats_router.post("/{user_id}", response_model=Chat)
 async def chat_create(
     user_id: int,
     chat_scheme: ChatCreate,
@@ -67,7 +67,7 @@ async def chat_create(
     return create_chat(db, chat_scheme.name, current_user.id, user_id)
 
 
-@chats_router.delete("/{chat_id}")
+@chats_router.delete("/{chat_id}", response_model=Chat)
 async def chat_delete(
     chat_id: int,
     db=Depends(get_db_connection),
@@ -76,7 +76,7 @@ async def chat_delete(
     return delete_chat(db, chat_id)
 
 
-@chats_router.patch("/{chat_id}")
+@chats_router.patch("/{chat_id}", response_model=Chat)
 async def chat_update(
     chat_id: int,
     new_chat: ChatUpdate,

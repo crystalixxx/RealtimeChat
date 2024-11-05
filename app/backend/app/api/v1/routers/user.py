@@ -14,6 +14,7 @@ from app.database.schemas.user import UserCreate, UserUpdate
 from app.database.session import get_db_connection
 from app.misc.auth import get_current_user, get_current_superuser
 from starlette import status
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 
 user_router = APIRouter()
 
@@ -46,7 +47,7 @@ async def common_users_list(
     return get_common_users(db, current_user.id)
 
 
-@user_router.post("/{user_id}")
+@user_router.post("/")
 async def user_create(
     user: UserCreate,
     db=Depends(get_db_connection),
@@ -68,7 +69,17 @@ async def user_delete(
     db=Depends(get_db_connection),
     current_user=Depends(get_current_superuser),
 ):
-    return delete_user(db, user_id)
+    if user_id == current_user.id:
+        raise HTTPException(
+            status_code=HTTP_409_CONFLICT, detail="You can't delete yourself"
+        )
+
+    user = delete_user(db, user_id)
+
+    if user is None:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail="User not found")
+
+    return user
 
 
 @user_router.patch("/{user_id}")
@@ -78,7 +89,7 @@ async def user_update(
     db=Depends(get_db_connection),
     current_user=Depends(get_current_superuser),
 ):
-    return update_user(db, user, current_user)
+    return update_user(db, user_id, user)
 
 
 @user_router.post("/block/{user_id}")

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import select
 
 from app.database.crud.user import get_user_by_id
-from app.database.models import Chat as ModelsChat, ChatMember, User
+from app.database.models import Chat, ChatMember, User
 from app.database.schemas.chat import ChatUpdate
 from app.database.session import get_db_connection
 from app.misc.auth import get_current_user
@@ -13,8 +13,8 @@ from app.misc.auth import get_current_user
 
 def create_chat(
     db: Session, chat_name: str, user_creator_id: int, user_id: int
-) -> ModelsChat:
-    chat = ModelsChat(name=chat_name)
+) -> Chat:
+    chat = Chat(name=chat_name)
 
     db.add(chat)
     db.commit()
@@ -26,12 +26,12 @@ def create_chat(
     return chat
 
 
-def get_all_chats(db: Session) -> list[ModelsChat]:
-    return db.query(ModelsChat).all()
+def get_all_chats(db: Session) -> list[Chat]:
+    return db.query(Chat).all()
 
 
-def get_chat_by_id(db: Session, chat_id: int) -> ModelsChat:
-    return db.query(ModelsChat).filter(ModelsChat.id == chat_id).first()
+def get_chat_by_id(db: Session, chat_id: int) -> Chat:
+    return db.query(Chat).filter(Chat.id == chat_id).first()
 
 
 def user_is_member_of_chat(
@@ -104,8 +104,8 @@ def remove_member_from_chat(db: Session, chat_id: int, user_id: int) -> ChatMemb
     return query
 
 
-def delete_chat(db: Session, chat_id: int) -> ModelsChat:
-    chat = db.query(ModelsChat).filter(ModelsChat.id == chat_id).first()
+def delete_chat(db: Session, chat_id: int) -> Chat:
+    chat = db.query(Chat).filter(Chat.id == chat_id).first()
 
     db.delete(chat)
     db.commit()
@@ -115,7 +115,7 @@ def delete_chat(db: Session, chat_id: int) -> ModelsChat:
 
 def edit_chat(db: Session, chat_id: int, new_chat: ChatUpdate):
     chat = get_chat_by_id(db, chat_id)
-    chat_dict = new_chat.dict(exclude_none=True)
+    chat_dict = new_chat.model_dump(exclude_none=True)
 
     for key, value in chat_dict.items():
         setattr(chat, key, value)

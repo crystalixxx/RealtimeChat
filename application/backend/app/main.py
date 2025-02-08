@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.main_routers import api_router
 
-app = FastAPI(title="GreenChat", docs_url="/api/docs", openapi_url="/api")
+app = FastAPI(title="Online Chat", docs_url="/api/docs", openapi_url="/api")
 app.include_router(api_router)
 
 app.add_middleware(

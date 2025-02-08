@@ -7,5 +7,5 @@ __all__ = [
     "SQLAlchemyRepository",
     "ChatRepository",
     "MessageRepository",
-    "UserRepository"
+    "UserRepository",
 ]

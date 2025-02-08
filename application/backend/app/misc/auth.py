@@ -8,7 +8,7 @@ from app.database.crud.user import create_user, get_user_by_username
 from app.database.session import get_db_connection
 from app.database.schemas.user import UserCreate, User
 from app.misc.security import oauth2_scheme, verify_password
-from app.misc.config import config
+from app.misc.config import settings
 
 
 async def get_current_user(
@@ -21,7 +21,7 @@ async def get_current_user(
     )
 
     try:
-        payload = jwt.decode(token, config.SECURITY_KEY, algorithms=[config.ALGORITHM])
+        payload = jwt.decode(token, settings.SECURITY_KEY, algorithms=[settings.ALGORITHM])
         email = payload.get("sub")
 
         if email is None:

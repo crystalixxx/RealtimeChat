@@ -1,15 +1,62 @@
+from typing import Literal
+
+from pydantic import BaseModel, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv(".env"))
+
+LOG_DEFAULT_FORMAT = (
+    "[%(asctime)s.%(msecs)03d] %(module)10s:%(lineno)-3d %(levelname)-7s - %(message)s"
+)
 
 
-class Config(BaseSettings):
-    model_config = SettingsConfigDict(case_sensitive=True)
+class LoggingConfig(BaseModel):
+    log_level: Literal[
+        "debug",
+        "info",
+        "warning",
+        "error",
+        "critical",
+    ] = "debug"
+    log_format: str = LOG_DEFAULT_FORMAT
 
-    PG_CONNECTION_URL: str = "postgresql://admin:admin@postgres:5432/postgres"
-    SECURITY_KEY: str = (
-        "709cb22f047a59f492c4d6407e627240e2272bda11ab791c16fb4f4661f7285a95ba6efbc1bbf762cddcc3710a1487f4a3242f21b2d9cd751b3154a452c5a286"
+
+class APIV0Prefix(BaseModel):
+    prefix: str = "/v0"
+
+
+class APIPrefix(BaseModel):
+    prefix: str = "/api"
+    v0: APIV0Prefix = APIV0Prefix()
+
+
+class DatabaseConfig(BaseModel):
+    url: PostgresDsn
+    echo: bool = False
+    echo_pool: bool = False
+    pool_size: int = 50
+    max_overflow: int = 10
+
+
+class SecurityConfig(BaseModel):
+    key: str
+    algorithm: str
+    access_token_expires_minutes: int = 120
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=False,
+        env_nested_delimiter="__",
+        env_prefix="APP_CONFIG__"
     )
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+    api: APIV0Prefix = APIV0Prefix()
+    logging: LoggingConfig = LoggingConfig()
+    db: DatabaseConfig
+    security: SecurityConfig
 
 
-config = Config()
+settings = Settings()

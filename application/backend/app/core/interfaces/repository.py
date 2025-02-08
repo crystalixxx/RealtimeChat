@@ -15,8 +15,15 @@ class AbstractRepository(ABC):
     async def find_one(self, filter_data: dict):
         raise NotImplementedError
 
+    async def find_some(self, filter_data: dict):
+        raise NotImplementedError
+
     @abstractmethod
-    async def update(self, filter_data: dict, data: dict):
+    async def update_one(self, filter_data: dict, data: dict):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update_many(self, filter_data: dict, data: dict):
         raise NotImplementedError
 
     @abstractmethod
